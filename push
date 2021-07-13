@@ -1,0 +1,61 @@
+#!/bin/bash
+set -e
+
+usage() {
+cat << EOF
+Usage: $0 [OPTIONS] [LABEL]
+Push a newly-built image with the given LABEL to DockerHub.
+
+Options:
+    --noavx			Push the image without AVX support.
+    -s, --source-image IMAGE	Tag for the source image.
+EOF
+}
+
+SOURCE_IMAGE_TAG='mindsync/python-cu11:latest'
+SOURCE_IMAGE_TAG_OVERRIDE=''
+TARGET_IMAGE='mindsync/python-gpu-p37-cu11'
+
+while :; do
+    case "$1" in 
+        -h|--help)
+            usage
+            exit
+            ;;
+        --noavx)
+            SOURCE_IMAGE_TAG='mindsync/python-gpu-p37-cu11-noavx:latest'
+            TARGET_IMAGE='mindsync/python-gpu-p37-cu11-noavx'
+            ;;
+        -s|--source-image)
+            if [[ -z $2 ]]; then
+                usage
+                printf 'ERROR: No IMAGE specified after the %s flag.\n' "$1" >&2
+                exit
+            fi
+            SOURCE_IMAGE_TAG_OVERRIDE=$2
+            shift # skip the flag value
+            ;;
+        -?*)
+            usage
+            printf 'ERROR: Unknown option: %s\n' "$1" >&2
+            exit
+            ;;
+        *)            
+            break
+    esac
+
+    shift
+done
+
+if [[ -n "$SOURCE_IMAGE_TAG_OVERRIDE" ]]; then
+    SOURCE_IMAGE_TAG="$SOURCE_IMAGE_TAG_OVERRIDE"
+fi
+
+readonly SOURCE_IMAGE_TAG
+readonly TARGET_IMAGE
+readonly LABEL
+
+set -x
+docker login -u "mindsync" docker.io
+docker tag "${SOURCE_IMAGE_TAG}" "${TARGET_IMAGE}:${LABEL}"
+docker -- push "${TARGET_IMAGE}:${LABEL}"
