@@ -33,7 +33,7 @@ while :; do
             printf 'ERROR: Unknown option: %s\n' "$1" >&2
             exit
             ;;
-        *)            
+        *)
             break
     esac
 

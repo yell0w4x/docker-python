@@ -15,6 +15,7 @@ EOF
 SOURCE_IMAGE_TAG='mindsync/python-cu11:latest'
 SOURCE_IMAGE_TAG_OVERRIDE=''
 TARGET_IMAGE='mindsync/python-gpu-p37-cu11'
+LABEL="latest"
 
 while :; do
     case "$1" in 

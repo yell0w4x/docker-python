@@ -9,7 +9,7 @@ if [[ "${RESTARTABLE}" == "yes" ]]; then
     wrapper="run-one-constantly"
 fi
 
-/usr/local/bin/custom.py "$@"
+python /usr/local/bin/custom.py "$@"
 
 if [[ -n "${JUPYTERHUB_API_TOKEN}" ]]; then
     # launched by JupyterHub, use single-user entrypoint

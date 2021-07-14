@@ -143,35 +143,7 @@ RUN conda install --quiet --yes \
 
 EXPOSE 8888
 
-
-# Configure container startup
-ENTRYPOINT ["tini", "-g", "--"]
-CMD ["start-notebook.sh"]
-
-
-# Copy local files as late as possible to avoid cache busting
-COPY start.sh start-notebook.sh start-singleuser.sh /usr/local/bin/
-
-# Mindsync customizations
-ADD custom /home/${NB_USER}/.jupyter/custom
-ADD custom.py /usr/local/bin
-
-# Currently need to have both jupyter_notebook_config and jupyter_server_config to support classic and lab
-COPY jupyter_notebook_config.py /etc/jupyter/
-
-# Fix permissions on /etc/jupyter as root
 USER root
-
-# Prepare upgrade to JupyterLab V3.0 #1205
-RUN sed -re "s/c.NotebookApp/c.ServerApp/g" \
-    /etc/jupyter/jupyter_notebook_config.py > /etc/jupyter/jupyter_server_config.py
-
-RUN fix-permissions /etc/jupyter/
-
-
-# Mindsync customizations
-RUN chmod a+rx /usr/local/bin/custom.py /usr/local/bin/start-notebook.sh /usr/local/bin/start.sh /usr/local/bin/start-singleuser.sh && \
-    apt update && apt install -y cron
 
 WORKDIR $HOME
 
@@ -272,7 +244,6 @@ RUN rm -rf /tmp/${TENSORFLOW_WHL}
 USER $NB_UID
 
 
-# Install PyTorch with dependencies
 RUN conda install --quiet --yes \
     pyyaml mkl mkl-include setuptools cmake cffi typing
 
@@ -280,7 +251,7 @@ RUN conda install --quiet --yes \
 # Check compatibility here:
 # https://pytorch.org/get-started/locally/
 # Installation via conda leads to errors installing cudatoolkit=10.1
-RUN pip install torch torchvision torchaudio torchviz
+#RUN pip install torch torchvision torchaudio torchviz
 
 
 # Clean installation
@@ -341,9 +312,34 @@ RUN jupyter labextension install @ijmbarr/jupyterlab_spellchecker
 RUN fix-permissions /home/$NB_USER
 
 
-# Switch back to jovyan to avoid accidental container runs as root
+# Switch back to mindsync to avoid accidental container runs as root
 USER $NB_UID
 
 
-# Copy jupyter_notebook_config.json
-COPY jupyter_notebook_config.json /etc/jupyter/
+# Configure container startup
+ENTRYPOINT ["tini", "-g", "--"]
+CMD ["start-notebook.sh"]
+
+
+# Copy local files as late as possible to avoid cache busting
+COPY start.sh start-notebook.sh start-singleuser.sh /usr/local/bin/
+
+# Install customizations
+ADD custom /home/${NB_USER}/.jupyter/custom
+ADD custom.py /usr/local/bin
+
+# Currently need to have both jupyter_notebook_config and jupyter_server_config to support classic and lab
+COPY jupyter_notebook_config.py /etc/jupyter/
+
+# Fix permissions on /etc/jupyter as root
+USER root
+
+# Prepare upgrade to JupyterLab V3.0 #1205
+RUN sed -re "s/c.NotebookApp/c.ServerApp/g" \
+    /etc/jupyter/jupyter_notebook_config.py > /etc/jupyter/jupyter_server_config.py
+
+RUN fix-permissions /etc/jupyter/
+
+RUN chmod a+rx /usr/local/bin/custom.py /usr/local/bin/start-notebook.sh /usr/local/bin/start.sh /usr/local/bin/start-singleuser.sh && \
+    apt update && apt install -y cron
+

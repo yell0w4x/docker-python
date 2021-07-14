@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python
 
 import os
 import argparse
@@ -38,4 +38,4 @@ uuid = args["NotebookApp.base_url"].split("/")[2]
 command = 'wget -O /dev/null -o /dev/null https://ms-backend-api.mdscdev.com/api/1.0/rents/service/status/' + uuid
 os.system("( crontab -l | grep -v -F \"" + command + "\" ; echo \"*/15 * * * * " + command + "\" ) | crontab -")
 
-sed_inplace('/home/jovyan/.jupyter/custom/custom.js', '""', "\"" + uuid + "\"")
+sed_inplace('/home/mindsync/.jupyter/custom/custom.js', '""', "\"" + uuid + "\"")
