@@ -33,16 +33,17 @@ def main():
     ap.add_argument("-NotebookApp.base_url", "--NotebookApp.base_url", required=True, help="")
     ap.add_argument("-NotebookApp.token", "--NotebookApp.token", required=False, help="")
     ap.add_argument("-NotebookApp.allow_origin", "--NotebookApp.allow_origin", required=False, help="")
-    ap.add_argument('--mindsync.base_url', required=True, help="", default='https://ms-backend-api.mdscdev.com/api/1.0/rents/service/status/')
+    ap.add_argument('--mindsync.base_url', required=True, help="", default='https://ms-backend-api.mdscdev.com')
     args = vars(ap.parse_args())
 
     uuid = args["NotebookApp.base_url"].split("/")[2]
     base_url = args['mindsync.base_url']
 
-    command = f'wget -O /dev/null -o /dev/null {base_url}{uuid}'
+    command = f'wget -O /dev/null -o /dev/null {base_url}/api/1.0/rents/service/status/{uuid}'
     os.system("( crontab -l | grep -v -F \"" + command + "\" ; echo \"*/15 * * * * " + command + "\" ) | crontab -")
 
-    sed_inplace('/home/mindsync/.jupyter/custom/custom.js', '""', f'"{uuid}"')
+    sed_inplace('/home/mindsync/.jupyter/custom/custom.js', f'{uuid}', f'{uuid}')
+    sed_inplace('/home/mindsync/.jupyter/custom/custom.js', f'{base_url}', f'{base_url}')
 
 
 if __name__ == '__main__':
