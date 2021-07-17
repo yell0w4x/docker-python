@@ -204,14 +204,7 @@ RUN conda install --quiet --yes \
     'sympy=1.7.*' \
     'vincent=0.4.*' \
     'widgetsnbextension=3.5.*'\
-    'xlrd=2.0.*' \
-    pyyaml \
-    mkl \
-    mkl-include \
-    setuptools \
-    cmake \
-    cffi \
-    typing && \
+    'xlrd=2.0.*' && \
     conda clean --all -f -y && \
     npm cache clean --force && \
     jupyter notebook --generate-config && \
